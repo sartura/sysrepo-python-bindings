@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 
 def weather_report_state_data(xpath, holder, request_id, original_xpath, private_ctx):
     print("\n\n ========== GET STATE DATA ========== \n\n")
-    
+
     print("Original XPATH: " + original_xpath)
     print("Current XPATH: " + xpath)
 
@@ -29,7 +29,7 @@ def weather_report_state_data(xpath, holder, request_id, original_xpath, private
         except Exception as e:
             logger.exception(e)
 
-    
+
 try:
     module = "weather-report"
 
