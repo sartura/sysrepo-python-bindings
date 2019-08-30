@@ -1,73 +1,85 @@
 module host-numa-pci {
-  yang-version 1.1;
-  namespace "http://terastrm.net/yang/host-numa-pci";
-  prefix "host-numa-pci";
+    yang-version 1.1;
+    namespace "http://terastrm.net/yang/host-numa-pci";
+    prefix "host-numa-pci";
 
-  organization "Deutsche Telekom AG";
-  contact
-    "ian.farrer@telekom.de";
+    organization
+      "Deutsche Telekom AG";
+    contact
+      "ian.farrer@telekom.de";
 
-  description "This model defines a YANG data module for storing information 
-    about a virtual machine host's CPU core toplogy and location of installed 
-    network interfaces";
+    description
+      "This model defines a YANG data module for storing information
+       about a virtual machine host's CPU core toplogy and location of installed
+       network interfaces";
 
-  revision 2018-09-04 {
-    description "Initial version";
-  }
-
-  container numa-topology {
-    description "Holds information about the NUMA nodes and the numbers of the
-      CPU cores that belong to each NUMA node";
-    config false;
-    list numa-nodes {
-      key numa-node;
-      leaf numa-node {
-        description "Number of the NUMA node";
-        type uint8;
-      }
-      leaf numa-node-mem {
-        description "Amount of RAM available for the node. Populated with the 
-          output of:
-          numactl -H
-          node 0 size: 128831 MB";
-        type uint32;
-        unit "MB";
-      }
-      leaf-list node-cpus {
-        description "CPU core numbers available for this node - populated with the output of
-          numactl -H
-          e.g. node 0 cpus: 0 1 2 3 4 5 12 13 14 15 16 17";
-      }
+    revision 2018-09-04 {
+        description
+          "Initial version";
     }
-  }
 
-  container host-interfaces {
-    description "Interfaces on the host available for use by VMs";
-    config false;
-    list interfaces {
-      key pci-addr;
-      leaf pci-addr {
-        description "PCI address of the interface, taken from the first field
-          in the output from the lspci command. These may need to be broken
-          down into separate fields for their component parts in the future,
-               but well use a string for now.";
-        type string;
-      }
-      leaf other-info {
-        description "Additional information about the interface type taken from
-          the output of lspci, poplulated with the string after the colon:
-          81:00.0 Ethernet controller: Intel Corporation 82599ES 10-Gigabit SFI/SFP+ Network Connection (rev 01)";
-        type string;
-      }
-      leaf int-type {
-        type enumeration {
-          descritpion "Type of Ethernet interface. This currently only has a
-            single option for 10-Gigabit, but is structured as an enum so it 
-            can be extended in the future. It is set by matching the enum
-            against the out of lspci.";
-          enum 10-Gigabit; 
+    container numa-topology {
+        description
+          "Holds information about the NUMA nodes and the numbers of the
+           CPU cores that belong to each NUMA node";
+        config false;
+        list numa-nodes {
+            key numa-node;
+            leaf numa-node {
+                description
+                  "Number of the NUMA node";
+                type uint8;
+            }
+            leaf numa-node-mem {
+                description
+                  "Amount of RAM available for the node. Populated with the
+                   output of:
+                   numactl -H
+                   node 0 size: 128831 MB";
+                type uint32;
+                units "MB";
+            }
+            leaf-list node-cpus {
+                description
+                  "CPU core numbers available for this node - populated with the output of
+                   numactl -H
+                   e.g. node 0 cpus: 0 1 2 3 4 5 12 13 14 15 16 17";
+                type uint32;
+            }
         }
-      }
     }
-  }
+
+    container host-interfaces {
+        description
+          "Interfaces on the host available for use by VMs";
+        config false;
+        list interfaces {
+            key pci-addr;
+            leaf pci-addr {
+                description
+                  "PCI address of the interface, taken from the first field
+                   in the output from the lspci command. These may need to be broken
+                   down into separate fields for their component parts in the future,
+                        but well use a string for now.";
+                type string;
+            }
+            leaf other-info {
+                description
+                  "Additional information about the interface type taken from
+                   the output of lspci, poplulated with the string after the colon:
+                   81:00.0 Ethernet controller: Intel Corporation 82599ES 10-Gigabit SFI/SFP+ Network Connection (rev 01)";
+                type string;
+            }
+            leaf int-type {
+                description
+                  "Type of Ethernet interface. This currently only has a
+                   single option for 10-Gigabit, but is structured as an enum so it
+                   can be extended in the future. It is set by matching the enum
+                   against the out of lspci.";
+                type enumeration {
+                    enum 10-Gigabit;
+                }
+            }
+        }
+    }
 }
