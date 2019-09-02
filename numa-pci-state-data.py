@@ -18,7 +18,7 @@ def numa_nodes_get(holder):
         node_count = int(lines[0].split(" ")[1])
         nodes = []
         values_count = 0
-        # create aray of tuples, where each tuple holds data necessarty for each node
+        # create array of tuples, where each tuple holds data necessary for each node
         for i in range(node_count):
             tup = ()
             for line in lines:
@@ -82,7 +82,7 @@ def host_numa_pci_state_data(xpath, holder, request_id, original_xpath, private_
     elif (last_node == "interfaces"):
         interfaces_get(holder)
     else:
-        print("unsuported leaf node")
+        print("unsupported leaf node")
 
 # ================================= INITIALIZATION ============================================
 try:
@@ -98,10 +98,12 @@ try:
 
     print("\n\n ========== Plugin subscription ========== \n\n")
 
-    subscription.dp_get_items_subscribe("/"+yang_module_name+":numa-topology", host_numa_pci_state_data, sr.SR_SUBSCR_DEFAULT)
-    subscription.dp_get_items_subscribe("/"+yang_module_name+":host-interfaces", host_numa_pci_state_data, sr.SR_SUBSCR_DEFAULT)
+    subscription.dp_get_items_subscribe("/"+yang_module_name+":numa-topology", host_numa_pci_state_data, None, sr.SR_SUBSCR_DEFAULT)
+    subscription.dp_get_items_subscribe("/"+yang_module_name+":host-interfaces", host_numa_pci_state_data, None, sr.SR_SUBSCR_DEFAULT)
 
     sr.global_loop()
+
+    subscription.unsubscribe()
 
     print("\n\n ========== Plugin exited ========== \n\n")
 
