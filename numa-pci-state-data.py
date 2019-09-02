@@ -29,17 +29,19 @@ def numa_nodes_get(holder):
             values_count += len(tup)
             nodes.insert(i, tup)
 
-        out_values = holder.allocate(values_count)
-        print(values_count)
-        index = 0
-        val_index = 0
+        try:
+            out_values = holder.allocate(values_count)
+            index = 0
+            val_index = 0
 
-        for node in nodes:
-            for i in range(len(node)-1):
-                out_values.val(val_index).set("/host-numa-pci:numa-topology/numa-nodes[numa-node='" + str(index) + "']/node-cpus", int(node[val_index]), sr.SR_UINT32_T)
-                val_index += 1
-            out_values.val(val_index).set("/host-numa-pci:numa-topology/numa-nodes[numa-node='" + str(index) + "']/numa-node-mem", int(node[val_index]), sr.SR_UINT32_T)
-            index += 1
+            for node in nodes:
+                for i in range(len(node)-1):
+                    out_values.val(val_index).set("/host-numa-pci:numa-topology/numa-nodes[numa-node='" + str(index) + "']/node-cpus", int(node[val_index]), sr.SR_UINT32_T)
+                    val_index += 1
+                out_values.val(val_index).set("/host-numa-pci:numa-topology/numa-nodes[numa-node='" + str(index) + "']/numa-node-mem", int(node[val_index]), sr.SR_UINT32_T)
+                index += 1
+        except Exception as e:
+            logging.exception(e)
 
 def interfaces_get(holder):
     p = sp.Popen(["lspci"], stdout=sp.PIPE)
@@ -47,7 +49,23 @@ def interfaces_get(holder):
     if (err):
         print(err)
     else:
-        print("TODO: implement")
+        lines = output.decode().splitlines()
+        index = 0
+        for line in lines:
+            if ("10-gigabit" not in line.lower()) or ("ethernet" not in line.lower()):
+                continue
+            try:
+                pci_address = line.split(" ")[0]
+                print(pci_address)
+                values = holder.reallocate(index+1)
+                values.val(index).set("/host-numa-pci:host-interfaces/interfaces[pci-addr='"+pci_address+"']/other-info", line[line.find(":")+1:], sr.SR_STRING_T)
+                values.val(index).set("/host-numa-pci:host-interfaces/interfaces[pci-addr='"+pci_address+"']/int-type", "10-Gigabit", sr.SR_ENUM_T)
+                index += 1
+            except Exception as e:
+                logging.exception(e)
+
+
+
 
 # ================================= STATE DATA CALLBACK =======================================
 def host_numa_pci_state_data(xpath, holder, request_id, original_xpath, private_ctx):
@@ -80,7 +98,7 @@ try:
     print("\n\n ========== Plugin subscription ========== \n\n")
 
     subscription.dp_get_items_subscribe("/"+yang_module_name+":numa-topology", host_numa_pci_state_data, sr.SR_SUBSCR_DEFAULT)
-    # subscription.dp_get_items_subscribe("/"+yang_module_name+":host-interfaces", host_numa_pci_state_data, sr.SR_SUBSCR_DEFAULT)
+    subscription.dp_get_items_subscribe("/"+yang_module_name+":host-interfaces", host_numa_pci_state_data, sr.SR_SUBSCR_DEFAULT)
 
     sr.global_loop()
 
