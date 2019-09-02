@@ -7,7 +7,7 @@ import sys
 import logging
 import subprocess as sp
 
-# ================================= HELPER FUNCTIONS ==========================================
+# ================================= HELPER FUNCTION #1 ==========================================
 def numa_nodes_get(holder):
     p = sp.Popen(["numactl", "-H"], stdout=sp.PIPE)
     output, err = p.communicate()
@@ -43,6 +43,7 @@ def numa_nodes_get(holder):
         except Exception as e:
             logging.exception(e)
 
+# ================================= HELPER FUNCTION #2 ==========================================
 def interfaces_get(holder):
     p = sp.Popen(["lspci"], stdout=sp.PIPE)
     output, err = p.communicate()
@@ -57,10 +58,10 @@ def interfaces_get(holder):
             try:
                 pci_address = line.split(" ")[0]
                 print(pci_address)
-                values = holder.reallocate(index+1)
+                values = holder.reallocate(index+2)
                 values.val(index).set("/host-numa-pci:host-interfaces/interfaces[pci-addr='"+pci_address+"']/other-info", line[line.find(":")+1:], sr.SR_STRING_T)
-                values.val(index).set("/host-numa-pci:host-interfaces/interfaces[pci-addr='"+pci_address+"']/int-type", "10-Gigabit", sr.SR_ENUM_T)
-                index += 1
+                values.val(index+1).set("/host-numa-pci:host-interfaces/interfaces[pci-addr='"+pci_address+"']/int-type", "10-Gigabit", sr.SR_ENUM_T)
+                index += 2
             except Exception as e:
                 logging.exception(e)
 
